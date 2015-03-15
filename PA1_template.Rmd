@@ -7,19 +7,60 @@ output:
 
 
 ## Loading and preprocessing the data
+rdata <- read.csv('activity.csv', header = TRUE, sep = ",", colClasses=c("numeric", "character", "numeric"))
+rdata$date <- as.Date(rdata$date, format = "%Y-%m-%d")
+rdata$interval <- as.factor(rdata$interval)
+str(rdata)
+
 
 
 
 ## What is mean total number of steps taken per day?
-
-
+steps_per_day <- aggregate(steps ~ date, rdata, sum)
+colnames(steps_per_day) <- c("date","steps")
+head(steps_per_day)
+ggplot(steps_per_day, aes(x = steps)) + geom_histogram(fill = "green", binwidth = 1000) + labs(title="Histogram of Steps Taken per Day",  x = "Number of Steps per Day", y = "Number of times in a day(Count)") + theme_bw()
 
 ## What is the average daily activity pattern?
 
+ggplot(steps_per_day, aes(x = steps)) + geom_histogram(fill = "green", binwidth = 1000) + labs(title="Histogram of Steps Taken per Day",  x = "Number of Steps per Day", y = "Number of times in a day(Count)") + theme_bw()
 
+steps_per_interval <- aggregate(rdata$steps, by = list(interval = rdata$interval),FUN=mean, na.rm=TRUE)
+steps_per_interval$interval <- as.integer(levels(steps_per_interval$interval)[steps_per_interval$interval])
+colnames(steps_per_interval) <- c("interval", "steps")
+ggplot(steps_per_interval, aes(x=interval, y=steps)) +   geom_line(color="orange", size=1) +  labs(title="Average Daily Activity Pattern", x="Interval", y="Number of steps") +   theme_bw()
 
 ## Imputing missing values
+countNA <- nrow(subset(originalData, is.na(originalData$steps)))
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+
+dateDayType <- data.frame(sapply(X = newData$Date, FUN = function(day) {
+    if (weekdays(as.Date(day)) %in% c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")) { day <- "weekday" } 
+    else {
+        day <- "weekend"
+    }
+}))
+
+newDataWithDayType <- cbind(newData, dateDayType)
+colnames(newDataWithDayType) <- c("Steps", "Date", "Interval", "DayType")
+
+dayTypeIntervalSteps <- aggregate(
+    data=newDataWithDayType,
+    Steps ~ DayType + Interval,
+    FUN=mean
+)
+
+library("lattice")
+
+xyplot(
+    type="l",
+    data=dayTypeIntervalSteps,
+    Steps ~ Interval | DayType,
+    xlab="Interval",
+    ylab="Number of steps",
+    layout=c(1,2)
+)
