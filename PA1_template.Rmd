@@ -18,8 +18,33 @@ Loading and preprocessing the data
 ------------------------------------------
 
 ```{r,echo = TRUE,eval=TRUE}
-# load data
-data_row <- read.csv('activity.csv')
+
+# set variables
+url <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip";
+zipfile <- "repdata_data_factivity.zip"
+csvfile <- "activity.csv"
+
+# download file and unzip
+download.file(url, zipfile, method="curl")
+unzip(zipfile)
+
+# read csv file into data.frame
+data_row <- read.csv(csvfile)
+
+# convert date factor to date
+dt_conv <- transform(dt, date=as.Date(date, format="%Y-%m-%d"))
+
+# aggregate by date and calculate sum
+dt_agg_day <- aggregate(steps ~ date, FUN=sum, data=dt_conv)
+vt_agg_day <- dt_agg_day$steps
+names(vt_agg_day) <- dt_agg_day$date 
+
+# make histogram
+hist(dt_agg_day$steps, xlab="number of steps", main="Total number of steps taken each day",col="gray")
+
+
+data<- dt_agg_day
+data_row <- dt
 
 # remove NA in data
 data <- data_row[ with (data_row, { !(is.na(steps)) } ), ]
