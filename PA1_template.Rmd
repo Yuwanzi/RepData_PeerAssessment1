@@ -4,18 +4,20 @@ Reproducible Research: Peer Assessment 1
 
 
 
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 # load all packages used in this exploratory analysis
 library(knitr)
 library(dplyr)
 library(ggplot2)
+library(plyr)
+library(reshape2)
 setwd('/home/daria/Courses/R/Coursera/Reproducible Research/RepData_PeerAssessment1')
 ```
 
 Loading and preprocessing the data
 ------------------------------------------
 
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 # load data
 data_row <- read.csv('activity.csv')
 
@@ -34,7 +36,7 @@ What is mean total number of steps taken per day?
 2.If you do not understand the difference between a histogram and a barplot, research the difference between them. Make a histogram of the total number of steps taken each day
 
 3.Calculate and report the mean and median of the total number of steps taken per day
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 by_day <- group_by(data, date)
 steps_by_day <- summarise(by_day, total = sum(steps))
 steps_by_day
@@ -50,7 +52,7 @@ What is the average daily activity pattern?
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 # preprocessing data for plot
 steps_by_interval <- aggregate(steps ~ interval, data, mean)
 
@@ -73,11 +75,11 @@ Imputing missing values
 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 The total missing value is:
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 sum(is.na(data_row))
 ```
 
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 #replacing NA’s with the mean for that 5-minute interval
 data_imputed <- data_row
 for (i in 1:nrow(data_imputed)) {
@@ -113,7 +115,7 @@ Are there differences in activity patterns between weekdays and weekends?
 
 2. Make a panel plot containing a time series plot (i.e. type = “l”) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r,echo = TRUE}
+```{r,echo = TRUE,eval=TRUE}
 data_imputed['type_of_day'] <- weekdays(as.Date(data_imputed$date))
 data_imputed$type_of_day[data_imputed$type_of_day  %in% c('Saturday','Sunday') ] <- "weekend"
 data_imputed$type_of_day[data_imputed$type_of_day != "weekend"] <- "weekday"
@@ -136,5 +138,6 @@ qplot(interval,
       main = "") +
   facet_wrap(~ type_of_day, ncol = 1)
 ```
+
 
 
